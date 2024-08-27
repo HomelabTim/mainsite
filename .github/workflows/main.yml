@@ -45,8 +45,8 @@ jobs:
 
       - name: Deploy site to NGINX
         run: |
-          sudo rm -rf /var/www/html/*
-          sudo cp -r public/* /var/www/html/
+          sudo rm -rf /var/www/*
+          sudo cp -r * /var/www/
 
       - name: Configure NGINX
         run: |
@@ -77,8 +77,8 @@ jobs:
 
       - name: Deploy site to NGINX
         run: |
-          sudo rm -rf /var/www/html/*
-          sudo cp -r public/* /var/www/html/
+          sudo rm -rf /var/www/*
+          sudo cp -r * /var/www/
 
       - name: Configure NGINX
         run: |
