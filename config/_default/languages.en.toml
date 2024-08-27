@@ -1,0 +1,14 @@
+languageCode = "en"
+languageName = "English"
+weight = 1
+title = "Timothy Smith's Portfolio"
+
+[params]
+  displayName = "English"
+  isoCode = "en"
+  rtl = false
+  dateFormat = "Jan 2, 2006"
+  logo = "img/logonotext.png"
+  secondaryLogo = "img/logonotext.png"
+  description = "Timothy Smith's Portfolio"
+  # copyright = "Copy, _right?_ :thinking_face:"
