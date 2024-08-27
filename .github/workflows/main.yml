@@ -1,0 +1,91 @@
+name: MyWebsite CI/CD
+
+on:
+  push:
+    branches:
+      - staging
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Hugo
+        run: |
+          sudo apt-get install hugo
+
+      - name: Build site
+        run: hugo
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: public
+
+  deploy-staging:
+    if: github.ref == 'refs/heads/staging'
+    environment: STAGING
+    runs-on: [self-hosted, homelabtim.com, staging]
+    needs: build
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+
+      - name: Deploy site to NGINX
+        run: |
+          sudo rm -rf /var/www/html/*
+          sudo cp -r public/* /var/www/html/
+
+      - name: Configure NGINX
+        run: |
+          echo '
+          server {
+              listen 81;
+              server_name ${{ secrets.DOMAIN }};
+              root /var/www/html;
+              index index.html;
+              location / {
+                  try_files $uri $uri/ =404;
+              }
+          }' | sudo tee /etc/nginx/sites-available/${{ secrets.DOMAIN }}
+
+          sudo ln -sf /etc/nginx/sites-available/${{ secrets.DOMAIN }} /etc/nginx/sites-enabled/
+          sudo systemctl reload nginx
+
+  deploy-production:
+    if: github.ref == 'refs/heads/main'
+    environment: PRODUCTION
+    runs-on: [self-hosted, homelabtim.com, production]
+    needs: build
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+
+      - name: Deploy site to NGINX
+        run: |
+          sudo rm -rf /var/www/html/*
+          sudo cp -r public/* /var/www/html/
+
+      - name: Configure NGINX
+        run: |
+          echo '
+          server {
+              listen 81;
+              server_name ${{ secrets.DOMAIN }};
+              root /var/www/html;
+              index index.html;
+              location / {
+                  try_files $uri $uri/ =404;
+              }
+          }' | sudo tee /etc/nginx/sites-available/${{ secrets.DOMAIN }}
+
+          sudo ln -sf /etc/nginx/sites-available/${{ secrets.DOMAIN }} /etc/nginx/sites-enabled/
+          sudo systemctl reload nginx
