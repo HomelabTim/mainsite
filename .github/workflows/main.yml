@@ -65,33 +65,46 @@ jobs:
           sudo systemctl reload nginx
 
   deploy-production:
-    if: github.ref == 'refs/heads/main'
+    if: github.event.ref == 'refs/heads/main'
     environment: PRODUCTION
     runs-on: [self-hosted, homelabtim.com, production]
     needs: build
+    env:
+      DOMAIN: ${{ vars.DOMAIN }}
+      PORT: ${{ vars.PORT }}
     steps:
+      - name: Cleanup build folder
+        run: |
+          ls -la ./
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+          ls -la ./
+
       - name: Download build artifact
         uses: actions/download-artifact@v3
         with:
           name: dist
 
-      - name: Deploy site to NGINX
-        run: |
-          sudo rm -rf /var/www/*
-          sudo cp -r * /var/www/
+      - name: Download NGINX config
+        uses: actions/download-artifact@v3
+        with:
+          name: nginx
 
-      - name: Configure NGINX
+      - name: Set NGINX config
         run: |
-          echo '
-          server {
-              listen 81;
-              server_name ${{ secrets.DOMAIN }};
-              root /var/www/html;
-              index index.html;
-              location / {
-                  try_files $uri $uri/ =404;
-              }
-          }' | sudo tee /etc/nginx/sites-available/${{ secrets.DOMAIN }}
+          sed -i "s/{{DOMAIN}}/$DOMAIN/" nginx.conf
+          sed -i "s/{{PORT}}/$PORT/" nginx.conf
 
-          sudo ln -sf /etc/nginx/sites-available/${{ secrets.DOMAIN }} /etc/nginx/sites-enabled/
-          sudo systemctl reload nginx
+          cat nginx.conf > /etc/nginx/sites-available/$DOMAIN
+
+          if [ ! -L /etc/nginx/sites-enabled/$DOMAIN ] ; then
+            ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
+          fi
+
+      - name: Hot Reload NGINX
+        run: /etc/init.d/nginx reload
+
+      - name: Deploy to NGINX
+        run: |
+          rm -rf /var/www/$DOMAIN
+          cp -r ./ /var/www/$DOMAIN
