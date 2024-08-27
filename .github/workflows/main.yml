@@ -17,6 +17,9 @@ jobs:
         run: |
           sudo apt-get install hugo
 
+      - name: Print working directory
+        run: pwd
+
       - name: Build site
         run: hugo
 
@@ -25,6 +28,9 @@ jobs:
         with:
           name: dist
           path: public
+
+      - name: Print working directory
+        run: pwd
 
   deploy-staging:
     if: github.ref == 'refs/heads/staging'
