@@ -280,7 +280,7 @@ params:
       - title: GitHub Repositories
         content: Since March 2023, I've been posting my repositories on GitHub and contributing to startup projects. My work focuses on Docker, Kubernetes, cloud infrastructure, source control management, and engaging with the developer community.
         url: "https://github.com/HomelabTim"
-        image: /images/GitHub-logo.png
+        image: /images/github.png
       - title: Portfolio Website
         content: Since October 2021, I've managed a Hugo-based portfolio website to showcase my tech projects and achievements. I use Markdown for detailed blog posts, highlighting my work and offering insights into various technologies. The site serves as a comprehensive platform for my tech contributions and experiences.
         url: "https://portfolio.homelabtim.com"
