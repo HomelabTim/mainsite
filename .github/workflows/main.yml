@@ -32,6 +32,12 @@ jobs:
       - name: Print working directory
         run: pwd
 
+      - name: Add nginx config to build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: nginx
+          path: nginx.conf
+
   deploy-staging:
     if: github.ref == 'refs/heads/staging'
     environment: STAGING
